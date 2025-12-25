@@ -1,0 +1,107 @@
+{
+  "summary": {
+    "total_vulnerabilities": 12,
+    "critical": 4,
+    "high": 5,
+    "medium": 2,
+    "low": 1
+  },
+  "details": [
+    {
+      "id": 1,
+      "file": "input.py",
+      "line_numbers": [8],
+      "original": "EXTERNAL_API_KEY = \"ABC123_SUPER_SECRET_API_KEY\"",
+      "updated": "",
+      "fix_explanation": "Removed hardcoded API key. Updated get_api_data to retrieve API key from environment variable EXTERNAL_API_KEY, raising ValueError if not set. Severity: High. Vulnerability type: Hardcoded secret."
+    },
+    {
+      "id": 2,
+      "file": "input.py",
+      "line_numbers": [9],
+      "original": "DB_USER = \"admin\"",
+      "updated": "",
+      "fix_explanation": "Removed hardcoded database username. Updated connect_db to retrieve from environment variable DB_USER, raising ValueError if not set. Severity: High. Vulnerability type: Hardcoded secret."
+    },
+    {
+      "id": 3,
+      "file": "input.py",
+      "line_numbers": [10],
+      "original": "DB_PASS = \"P@ssw0rd!\"",
+      "updated": "",
+      "fix_explanation": "Removed hardcoded database password. Updated connect_db to retrieve from environment variable DB_PASS, raising ValueError if not set. Severity: High. Vulnerability type: Hardcoded secret."
+    },
+    {
+      "id": 4,
+      "file": "input.py",
+      "line_numbers": [13],
+      "original": "r = requests.get(endpoint, headers=headers, verify=False)",
+      "updated": "r = requests.get(endpoint, headers=headers)",
+      "fix_explanation": "Enabled SSL certificate verification by removing verify=False. Severity: Medium. Vulnerability type: Insecure SSL/TLS configuration."
+    },
+    {
+      "id": 5,
+      "file": "input.py",
+      "line_numbers": [18],
+      "original": "cur.execute(f\"SELECT id FROM users WHERE username = '{username}' AND password = '{password}'\")",
+      "updated": "cur.execute(\"SELECT id FROM users WHERE username = ? AND password = ?\", (username, password))",
+      "fix_explanation": "Fixed SQL injection by using parameterized queries instead of f-string formatting. Severity: Critical. Vulnerability type: SQL injection."
+    },
+    {
+      "id": 6,
+      "file": "input.py",
+      "line_numbers": [22],
+      "original": "subprocess.call(cmd, shell=True)",
+      "updated": "subprocess.run([\"ping\", \"-n\", \"1\", user_input])",
+      "fix_explanation": "Fixed command injection by using subprocess.run with a list instead of shell=True and string formatting. Severity: Critical. Vulnerability type: Command injection."
+    },
+    {
+      "id": 7,
+      "file": "input.py",
+      "line_numbers": [25],
+      "original": "def load_user_profile(serialized_data: bytes):\n    profile = pickle.loads(serialized_data)\n    return profile",
+      "updated": "",
+      "fix_explanation": "Removed insecure deserialization function using pickle.loads, which can execute arbitrary code. Severity: Critical. Vulnerability type: Insecure deserialization."
+    },
+    {
+      "id": 8,
+      "file": "input.py",
+      "line_numbers": [28],
+      "original": "def eval_expression(expr: str):\n    return eval(expr)",
+      "updated": "",
+      "fix_explanation": "Removed code injection function using eval, which can execute arbitrary code. Severity: Critical. Vulnerability type: Code injection."
+    },
+    {
+      "id": 9,
+      "file": "input.py",
+      "line_numbers": [31, 32, 33, 34],
+      "original": "def get_private_key():\n    private_key = \"\"\"-----BEGIN RSA PRIVATE KEY-----\nMIICWwIBAAKBgQC7...\n-----END RSA PRIVATE KEY-----\"\"\"\n    return private_key",
+      "updated": "",
+      "fix_explanation": "Removed function that returns hardcoded private key. Severity: High. Vulnerability type: Hardcoded secret."
+    },
+    {
+      "id": 10,
+      "file": "input.py",
+      "line_numbers": [39],
+      "original": "def upload_file(file_path: str, destination: str):\n    with open(file_path, \"rb\") as f:\n        data = f.read()\n    requests.post(destination, data=data)",
+      "updated": "def upload_file(file_path: str, destination: str):\n    if not os.path.isfile(file_path) or \"..\" in file_path:\n        raise ValueError(\"Invalid file path\")\n    with open(file_path, \"rb\") as f:\n        data = f.read()\n    requests.post(destination, data=data)",
+      "fix_explanation": "Added path validation to prevent directory traversal attacks. Severity: High. Vulnerability type: Path traversal."
+    },
+    {
+      "id": 11,
+      "file": "input.py",
+      "line_numbers": [45],
+      "original": "if not token:\n        token = \"DEFAULT_TOKEN_IN_CODE\"",
+      "updated": "if not token:\n        raise ValueError(\"SERVICE_TOKEN not set\")",
+      "fix_explanation": "Removed hardcoded fallback token, raising error if environment variable not set. Severity: Medium. Vulnerability type: Hardcoded secret."
+    },
+    {
+      "id": 12,
+      "file": "input.py",
+      "line_numbers": [49],
+      "original": "def insecure_temp_file_write(data: str):\n    tmp_path = \"/tmp/vuln_temp.txt\"\n    with open(tmp_path, \"w\") as f:\n        f.write(data)\n    return tmp_path",
+      "updated": "def secure_temp_file_write(data: str):\n    with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as f:\n        f.write(data)\n        return f.name",
+      "fix_explanation": "Used secure temporary file creation with tempfile module instead of hardcoded /tmp path. Severity: Low. Vulnerability type: Insecure temporary file handling."
+    }
+  ]
+}
