@@ -1,0 +1,113 @@
+------------------------------------------------------------
+2025-12-25T06:00:55.249597Z - START - input_backup.py
+else was unexpected at this time.
+
+2025-12-25T06:00:55.249597Z - input_backup.py - TEST FAILED (exit 255)
+------------------------------------------------------------
+2025-12-25T06:00:55.276604Z - START - input.py
+else was unexpected at this time.
+
+2025-12-25T06:00:55.276604Z - input.py - TEST FAILED (exit 255)
+============================================================
+2025-12-25T06:00:55.278035Z - AUTO_TEST SUMMARY - SOME FAILED
+-------------------- 
+Thu 12/25/2025 14:01:37.28 - START - input_backup.py 
+Thu 12/25/2025 14:01:37.28 - input_backup.py - TEST FAILED (exit 0
+------------------------------------------------------------
+2025-12-25T06:01:37.640161Z - START - input_backup.py
+The process cannot access the file because it is being used by another process.
+
+2025-12-25T06:01:37.640161Z - input_backup.py - TEST PASSED
+-------------------- 
+Thu 12/25/2025 14:01:37.66 - START - input.py 
+Thu 12/25/2025 14:01:38.02 - %F - TEST PASSED 
+------------------------------------------------------------
+2025-12-25T06:01:38.031434Z - START - input.py
+The system cannot find the file specified.
+
+2025-12-25T06:01:38.031434Z - input.py - TEST PASSED
+============================================================
+2025-12-25T06:01:38.031434Z - AUTO_TEST SUMMARY - ALL PASSED
+-------------------- 
+Thu 12/25/2025 14:04:59.54 - START - input_backup.py 
+Thu 12/25/2025 14:04:59.54 - input_backup.py - TEST FAILED (exit 0
+------------------------------------------------------------
+2025-12-25T06:04:59.904718Z - START - input_backup.py
+The process cannot access the file because it is being used by another process.
+
+2025-12-25T06:04:59.904718Z - input_backup.py - TEST PASSED
+-------------------- 
+Thu 12/25/2025 14:04:59.92 - START - input.py 
+Thu 12/25/2025 14:05:00.28 - %F - TEST PASSED 
+------------------------------------------------------------
+2025-12-25T06:05:00.295365Z - START - input.py
+The system cannot find the file specified.
+
+2025-12-25T06:05:00.295365Z - input.py - TEST PASSED
+============================================================
+2025-12-25T06:05:00.295886Z - AUTO_TEST SUMMARY - ALL PASSED
+-------------------- 
+Thu 12/25/2025 14:07:55.60 - START - input_backup.py 
+Thu 12/25/2025 14:07:55.60 - input_backup.py - TEST FAILED (exit 0
+------------------------------------------------------------
+2025-12-25T06:07:55.954400Z - START - input_backup.py
+The process cannot access the file because it is being used by another process.
+
+2025-12-25T06:07:55.954400Z - input_backup.py - SOURCE ISSUES FOUND:
+  - Hardcoded API key (line 9): EXTERNAL_API_KEY = "ABC123_SUPER_SECRET_API_KEY"
+  - Hardcoded DB credentials (line 10): DB_USER = "admin"
+  - Hardcoded DB credentials (line 11): DB_PASS = "P@ssw0rd!"
+  - Disabled SSL verification (verify=False) (line 15): r = requests.get(endpoint, headers=headers, verify=False)
+  - Potential SQL injection with formatted query (line 23): cur.execute(f"SELECT id FROM users WHERE username = '{username}' AND password = '{password}'")
+  - subprocess with shell=True (line 28): subprocess.call(cmd, shell=True)
+  - Use of pickle.loads() (line 31): profile = pickle.loads(serialized_data)
+  - Use of eval() (line 35): return eval(expr)
+  - Hardcoded private key (line 42): private_key = """-----BEGIN RSA PRIVATE KEY-----
+  - Default token in source (line 55): token = "DEFAULT_TOKEN_IN_CODE"
+  - Predictable temporary file path (line 59): tmp_path = "/tmp/vuln_temp.txt"
+2025-12-25T06:07:55.954400Z - input_backup.py - TEST FAILED (exit 0)
+-------------------- 
+Thu 12/25/2025 14:07:55.97 - START - input.py 
+Thu 12/25/2025 14:07:56.32 - %F - TEST PASSED 
+------------------------------------------------------------
+2025-12-25T06:07:56.336154Z - START - input.py
+The system cannot find the file specified.
+
+2025-12-25T06:07:56.336154Z - input.py - SOURCE ISSUES FOUND:
+  - Potential SQL injection with formatted query (line 45): cur.execute("SELECT id FROM users WHERE username = ? AND password = ?", (username, password))
+  - subprocess with shell=True (line 48): # Validate user input and avoid shell=True. Use platform-aware ping args.
+  - subprocess with shell=True (line 57): # Do not use shell=True and capture output
+  - Use of pickle.loads() (line 70): return pickle.loads(serialized_data)
+2025-12-25T06:07:56.336154Z - input.py - TEST FAILED (exit 0)
+============================================================
+2025-12-25T06:07:56.337193Z - AUTO_TEST SUMMARY - SOME FAILED
+-------------------- 
+Thu 12/25/2025 14:08:28.61 - START - input_backup.py 
+Thu 12/25/2025 14:08:28.61 - input_backup.py - TEST FAILED (exit 0
+------------------------------------------------------------
+2025-12-25T06:08:28.985992Z - START - input_backup.py
+The process cannot access the file because it is being used by another process.
+
+2025-12-25T06:08:28.985992Z - input_backup.py - SOURCE ISSUES FOUND:
+  - Hardcoded API key (line 9): EXTERNAL_API_KEY = "ABC123_SUPER_SECRET_API_KEY"
+  - Hardcoded DB credentials (line 10): DB_USER = "admin"
+  - Hardcoded DB credentials (line 11): DB_PASS = "P@ssw0rd!"
+  - Disabled SSL verification (verify=False) (line 15): r = requests.get(endpoint, headers=headers, verify=False)
+  - Potential SQL injection via f-string/.format/% (line 23): cur.execute(f"SELECT id FROM users WHERE username = '{username}' AND password = '{password}'")
+  - subprocess with shell=True (line 28): subprocess.call(cmd, shell=True)
+  - Use of pickle.loads() (line 31): profile = pickle.loads(serialized_data)
+  - Use of eval() (line 35): return eval(expr)
+  - Hardcoded private key (line 42): private_key = """-----BEGIN RSA PRIVATE KEY-----
+  - Default token in source (line 55): token = "DEFAULT_TOKEN_IN_CODE"
+  - Predictable temporary file path (line 59): tmp_path = "/tmp/vuln_temp.txt"
+2025-12-25T06:08:28.985992Z - input_backup.py - TEST FAILED (exit 0)
+-------------------- 
+Thu 12/25/2025 14:08:29.01 - START - input.py 
+Thu 12/25/2025 14:08:29.39 - %F - TEST PASSED 
+------------------------------------------------------------
+2025-12-25T06:08:29.409963Z - START - input.py
+The system cannot find the file specified.
+
+2025-12-25T06:08:29.409963Z - input.py - TEST PASSED
+============================================================
+2025-12-25T06:08:29.409963Z - AUTO_TEST SUMMARY - SOME FAILED

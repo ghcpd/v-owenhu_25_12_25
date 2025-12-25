@@ -1,0 +1,70 @@
+You are a software security engineer. Your task is to audit and secure the provided source file named `input.py`.
+
+Deliverables (exactly):
+
+1) Findings and Backup
+   - Identify all vulnerabilities in `input.py` and list each with file name and precise line numbers.
+   - Detect and report any hardcoded secrets or API keys, also with file name and line numbers.
+   - Create an exact backup of the original source named `input_backup.py` before making any changes.
+
+2) Secure the source
+   - Produce a secure, fixed version of `input.py` that eliminates ALL identified vulnerabilities while preserving intended functionality where reasonable.
+   - Replace hardcoded secrets with environment-variable based configuration or read from a protected file path.
+   - Remove unsafe constructs (no `eval()` on arbitrary input, no unsafe `pickle.loads()` by default, no `shell=True` using unvalidated inputs, no inline default secrets, no verify=False on requests).
+   - Use parameterized SQL queries; validate or sanitize external inputs; avoid predictable temp file paths; restrict file write permissions when secrets are stored on disk.
+
+3) Evidence & Explanation
+   - Create `report.json` (JSON only) with the exact schema below and fill entries for every finding and fix:
+
+{
+  "summary": {
+    "total_vulnerabilities": <integer>,
+    "critical": <integer>,
+    "high": <integer>,
+    "medium": <integer>,
+    "low": <integer>
+  },
+  "details": [
+    {
+      "id": <integer>,
+      "file": "input.py",
+      "line_numbers": [<list of integers>],
+      "original": "<string>",
+      "updated": "<string>",
+      "fix_explanation": "<string>"
+    }
+  ]
+}
+
+   - Each detail must include the vulnerability type, severity, affected lines, original snippet, replacement snippet, and a concise reasoning for the remediation.
+
+4) Reproducible environment and tests
+   - Add `requirements.txt`, `Dockerfile`, and `setup.sh` (Linux/macOS) to reproduce the environment.
+   - Add `run_test.sh` (Linux/macOS) and `run_test.bat` (Windows) to run the tests for a single target or both targets. Tests MUST be safe (no destructive operations when `SAFE_TEST=1`).
+   - Implement `auto_test.py` that:
+     - Detects the current platform (Windows/Linux/Docker).
+     - Runs the corresponding test runner for both `input_backup.py` and `input.py` in sequence.
+     - Writes detailed logs to `logs/test_run.log` (append mode), each test block must include start timestamp, test output, and final status line `TEST PASSED` or `TEST FAILED`.
+     - Determines pass/fail based on both: process exit codes and static/rule-based source checks (detect hardcoded secrets, use of eval/pickle.loads/shell=True/verify=False, etc.).
+     - When static checks detect problems in source code, mark that test as FAILED even if the process exit code is 0.
+
+5) Test harness & safety
+   - Provide a `tests/sitecustomize.py` (or equivalent) that stubs network/subprocess/pickle in `SAFE_TEST` mode to prevent destructive or network operations during tests.
+   - Tests should capture stdout/stderr into `logs/<target>.out` and append those outputs to `logs/test_run.log`.
+   - The test runner must treat any runtime error output (tracebacks, unhandled exceptions, or notable OS error messages) as a test failure.
+
+6) Documentation
+   - Provide `README.md` describing every generated file, setup steps, how to run tests (per platform), how `auto_test.py` works, and how to interpret `logs/test_run.log` (including the `TEST PASSED` / `TEST FAILED` lines).
+
+Constraints & Notes:
+- Do not change any files other than those necessary to implement the deliverables listed above.
+- Keep changes minimal and focused; document every change in `report.json`.
+- Ensure the outputs are deterministic and safe: the `auto_test.py` must be able to run in an isolated environment and produce `logs/test_run.log` reproducibly.
+- Prefer explicit checks (static patterns and runtime output scanning) rather than brittle heuristics.
+
+Success Criteria:
+- `input_backup.py` must remain an unmodified copy of the original and should fail the tests due to detected insecure patterns.
+- `input.py` must pass the `auto_test.py` checks (no static critical issues and no runtime errors under `SAFE_TEST`).
+- `report.json` must enumerate all findings and fixes with clear severity classifications.
+
+End of prompt.

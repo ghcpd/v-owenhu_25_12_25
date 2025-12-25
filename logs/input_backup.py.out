@@ -1,0 +1,8 @@
+SAFE_TEST_RESPONSE
+Traceback (most recent call last):
+  File "D:\Bug Bash\API\case_25_12_25\oswe-mini-prime-new\v-owenhu_25_12_25\input_backup.py", line 66, in <module>
+    print(connect_db("example.db"))
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Bug Bash\API\case_25_12_25\oswe-mini-prime-new\v-owenhu_25_12_25\input_backup.py", line 23, in connect_db
+    cur.execute(f"SELECT id FROM users WHERE username = '{username}' AND password = '{password}'")
+sqlite3.OperationalError: no such table: users

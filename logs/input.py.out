@@ -1,0 +1,7 @@
+ERROR:__main__:Missing EXTERNAL_API_KEY in environment
+ERROR:__main__:DB connect failed: Database credentials not set in environment
+None
+{'name': 'test'}
+{'a': 1}
+None
+C:\Users\v-owenhu\AppData\Local\Temp\vuln_04kefist
