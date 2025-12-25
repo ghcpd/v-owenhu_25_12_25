@@ -1,0 +1,107 @@
+{
+  "summary": {
+    "total_vulnerabilities": 12,
+    "critical": 4,
+    "high": 3,
+    "medium": 4,
+    "low": 1
+  },
+  "details": [
+    {
+      "id": 1,
+      "file": "input.py",
+      "line_numbers": [8],
+      "original": "EXTERNAL_API_KEY = \"ABC123_SUPER_SECRET_API_KEY\"",
+      "updated": "EXTERNAL_API_KEY = None  # must be provided via environment variable",
+      "fix_explanation": "Hardcoded API key removed and required to be supplied via environment variable. Severity: High. A hardcoded API key can be leaked from source control and allows unauthorized access."
+    },
+    {
+      "id": 2,
+      "file": "input.py",
+      "line_numbers": [9, 10],
+      "original": "DB_USER = \"admin\"\nDB_PASS = \"P@ssw0rd!\"",
+      "updated": "DB_USER = None\nDB_PASS = None  # credentials must come from environment or parameters",
+      "fix_explanation": "Removed hardcoded DB credentials; now loaded from environment or passed into functions. Severity: High. Hardcoded DB credentials risk unauthorized DB access."
+    },
+    {
+      "id": 3,
+      "file": "input.py",
+      "line_numbers": [14],
+      "original": "r = requests.get(endpoint, headers=headers, verify=False)",
+      "updated": "r = requests.get(endpoint, headers=headers, timeout=timeout, verify=True)",
+      "fix_explanation": "Enabled TLS verification and a request timeout, and enforce HTTPS endpoints. Severity: High. Disabling certificate verification allows man-in-the-middle attacks."
+    },
+    {
+      "id": 4,
+      "file": "input.py",
+      "line_numbers": [22],
+      "original": "cur.execute(f\"SELECT id FROM users WHERE username = '{username}' AND password = '{password}'\")",
+      "updated": "cur.execute(\"SELECT id FROM users WHERE username = ? AND password = ?\", (username, password))",
+      "fix_explanation": "Replaced string interpolation with parameterized SQL query to prevent SQL injection. Severity: Medium. Even static credentials used unsafely can become a maintenance risk."
+    },
+    {
+      "id": 5,
+      "file": "input.py",
+      "line_numbers": [25, 26, 27],
+      "original": "cmd = f\"ping -n 1 {user_input}\"\nsubprocess.call(cmd, shell=True)",
+      "updated": "if not re.fullmatch(r\"[A-Za-z0-9.:-]+\", user_input): raise ValueError('invalid host input')\nresult = subprocess.run(['ping', '-n', '1', user_input], check=False)",
+      "fix_explanation": "Removed shell=True and validated user input to prevent command injection. Severity: Critical. shell=True with untrusted input allows arbitrary command execution."
+    },
+    {
+      "id": 6,
+      "file": "input.py",
+      "line_numbers": [29, 30, 31],
+      "original": "profile = pickle.loads(serialized_data)\nreturn profile",
+      "updated": "try: return json.loads(serialized_data.decode('utf-8'))\nexcept Exception: raise ValueError('unsupported or unsafe serialized format')",
+      "fix_explanation": "Replaced unsafe `pickle.loads` with JSON-only deserialization and reject pickled input. Severity: Critical. Pickle deserialization can lead to remote code execution."
+    },
+    {
+      "id": 7,
+      "file": "input.py",
+      "line_numbers": [33, 34],
+      "original": "return eval(expr)",
+      "updated": "return ast.literal_eval(expr)  # only literals allowed",
+      "fix_explanation": "Replaced `eval` with `ast.literal_eval` to avoid arbitrary code execution. Severity: Critical. `eval` can run arbitrary code provided by an attacker."
+    },
+    {
+      "id": 8,
+      "file": "input.py",
+      "line_numbers": [36, 37, 38],
+      "original": "with open(path, \"w\") as f:\n    f.write(secret)",
+      "updated": "if not os.getenv('SECRET_ENC_KEY'): raise PermissionError(...)\n# write protected/encrypted file with restrictive permissions",
+      "fix_explanation": "Prevent writing plaintext secrets to disk unless an encryption key is provided; write atomically and with 0o600 permissions. Severity: Medium. Plaintext secrets on disk are easily exposed."
+    },
+    {
+      "id": 9,
+      "file": "input.py",
+      "line_numbers": [40, 41, 42, 43],
+      "original": "private_key = \"-----BEGIN RSA PRIVATE KEY-----\nMIICWwIBAAKBgQC7...\n-----END RSA PRIVATE KEY-----\\nreturn private_key",
+      "updated": "load private key from environment variable or from file path specified by PRIVATE_KEY_PATH; never hardcode keys",
+      "fix_explanation": "Removed embedded private key and require it to be loaded from secure storage or environment. Severity: Critical. Hardcoded private keys are catastrophic if leaked."
+    },
+    {
+      "id": 10,
+      "file": "input.py",
+      "line_numbers": [46, 47, 48, 49],
+      "original": "with open(file_path, \"rb\") as f:\n    data = f.read()\nrequests.post(destination, data=data)",
+      "updated": "ensure destination is https:// and file is inside working directory; use timeout and verify=True; raise on outside-path uploads",
+      "fix_explanation": "Validated destination URL and restricted uploadable file paths, added timeouts and TLS verification. Severity: High. Unrestricted file reads/uploads can lead to data exfiltration and path traversal."
+    },
+    {
+      "id": 11,
+      "file": "input.py",
+      "line_numbers": [51, 52, 53, 54],
+      "original": "token = os.getenv(\"SERVICE_TOKEN\")\nif not token:\n    token = \"DEFAULT_TOKEN_IN_CODE\"",
+      "updated": "token = os.getenv(\"SERVICE_TOKEN\")\nif not token: raise EnvironmentError('SERVICE_TOKEN must be set')",
+      "fix_explanation": "Removed insecure hardcoded token fallback; require environment-provided token. Severity: Medium. Default credentials weaken security posture."
+    },
+    {
+      "id": 12,
+      "file": "input.py",
+      "line_numbers": [57, 58, 59, 60],
+      "original": "tmp_path = \"/tmp/vuln_temp.txt\"\nwith open(tmp_path, \"w\") as f:\n    f.write(data)",
+      "updated": "use tempfile.mkstemp(), write data atomically and set file mode to 0o600",
+      "fix_explanation": "Replaced predictable temp file usage with a secure temporary file and restrictive permissions. Severity: Low. Predictable temp files can be exploited by symlink/TOCTOU attacks."
+    }
+  ]
+}

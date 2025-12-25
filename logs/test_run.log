@@ -1,0 +1,54 @@
+[2025-12-25T07:07:56.496051Z] Running tests for input_backup.py
+[2025-12-25T07:07:56.522263Z] OUTPUT for input_backup.py:
+Bash\API\case_25_12_25\oswe-mini-m23a2s165\v-owenhu_25_12_25\input_backup.py""=="" was unexpected at this time.
+
+[2025-12-25T07:07:56.523263Z] input_backup.py final status: TEST FAILED
+[2025-12-25T07:07:56.523263Z] Running tests for input.py
+[2025-12-25T07:07:56.548910Z] OUTPUT for input.py:
+Bash\API\case_25_12_25\oswe-mini-m23a2s165\v-owenhu_25_12_25\input.py""=="" was unexpected at this time.
+
+[2025-12-25T07:07:56.549907Z] input.py final status: TEST FAILED
+[2025-12-25T07:07:56.549907Z] OVERALL: TEST FAILED
+[2025-12-25T07:09:15.791477Z] Running tests for input_backup.py
+[2025-12-25T07:09:15.808951Z] OUTPUT for input_backup.py:
+'D:\Bug' is not recognized as an internal or external command,
+operable program or batch file.
+
+[2025-12-25T07:09:15.809951Z] input_backup.py final status: TEST FAILED
+[2025-12-25T07:09:15.809951Z] Running tests for input.py
+[2025-12-25T07:09:15.827971Z] OUTPUT for input.py:
+'D:\Bug' is not recognized as an internal or external command,
+operable program or batch file.
+
+[2025-12-25T07:09:15.829318Z] input.py final status: TEST FAILED
+[2025-12-25T07:09:15.829318Z] OVERALL: TEST FAILED
+[2025-12-25T07:10:16.541650Z] Running tests for input_backup.py
+[2025-12-25T07:10:16.588286Z] OUTPUT for input_backup.py:
+'D:\Bug' is not recognized as an internal or external command,
+operable program or batch file.
+
+[2025-12-25T07:10:16.589414Z] input_backup.py final status: TEST FAILED
+[2025-12-25T07:10:16.589414Z] Running tests for input.py
+[2025-12-25T07:10:16.632511Z] OUTPUT for input.py:
+'D:\Bug' is not recognized as an internal or external command,
+operable program or batch file.
+
+[2025-12-25T07:10:16.633504Z] input.py final status: TEST FAILED
+[2025-12-25T07:10:16.633504Z] OVERALL: TEST FAILED
+[2025-12-25T07:11:30.068791Z] Running tests for input_backup.py
+[2025-12-25T07:11:30.393839Z] OUTPUT for input_backup.py:
+FAIL: hardcoded EXTERNAL_API_KEY detected
+
+[2025-12-25T07:11:30.394855Z] input_backup.py final status: TEST FAILED
+[2025-12-25T07:11:30.395837Z] Running tests for input.py
+[2025-12-25T07:11:30.730323Z] OUTPUT for input.py:
+OK: no hardcoded EXTERNAL_API_KEY
+OK: eval_expression is safe
+OK: load_user_profile rejects pickle/deserialization attacks
+OK: run_command input validation in place
+OK: get_env_token_fallback enforces environment configuration
+OK: insecure_temp_file_write uses secure temporary file
+All checks passed for D:\Bug Bash\API\case_25_12_25\oswe-mini-m23a2s165\v-owenhu_25_12_25\input.py
+
+[2025-12-25T07:11:30.731382Z] input.py final status: TEST PASSED
+[2025-12-25T07:11:30.732392Z] OVERALL: TEST PASSED

@@ -1,0 +1,35 @@
+Task: Audit and secure the supplied Python source file `input.py`.
+
+Requirements (must be completed exactly):
+
+1) Identify all vulnerabilities in `input.py` and list each with file name and exact line numbers.
+2) Detect and report any hardcoded secrets or API keys with file name and exact line numbers.
+3) Create a backup copy named `input_backup.py` before modifying the original.
+4) Repair the source so all identified vulnerabilities are eliminated and save the secure version as `input.py`.
+5) Produce a structured JSON report `report.json` containing a summary and per-fix details using this format:
+   {
+     "summary": { "total_vulnerabilities": <int>, "critical": <int>, "high": <int>, "medium": <int>, "low": <int> },
+     "details": [ { "id": <int>, "file": "input.py", "line_numbers": [<ints>], "original": "<string>", "updated": "<string>", "fix_explanation": "<string>" } ]
+   }
+6) Add environment replication artifacts:
+   - `requirements.txt`, `Dockerfile`, `setup.sh`
+   - `run_test.sh` (Linux/macOS), `run_test.bat` (Windows)
+7) Implement `auto_test.py` that:
+   - Detects environment (Windows/Linux/Docker)
+   - Runs appropriate test script
+   - Logs timestamped output to `logs/test_run.log`
+   - Runs tests for both `input_backup.py` and `input.py` in sequence and records per-file output and final status
+   - Writes a final overall status line: TEST PASSED or TEST FAILED
+8) Create `README.md` explaining files, setup steps, how to run tests, how to use `auto_test.py`, and how to interpret `logs/test_run.log`.
+
+Acceptance criteria:
+- `input_backup.py` demonstrates the original vulnerabilities (tests should fail for backup).
+- `input.py` passes the security checks (tests should pass for fixed file).
+- `report.json` accurately documents each fix with affected line numbers and rationale.
+- No secrets or keys are left hardcoded in `input.py`.
+- All scripts run on Windows and Linux; Dockerfile must build and run `auto_test.py` successfully.
+
+Notes:
+- Do not modify any files other than those required by the task.
+- Prefer secure-by-default implementations (no eval/pickle, parameterized SQL, no shell=True with untrusted input, TLS verify enabled, secrets from environment or secure storage).
+- Tests must be deterministic and use exit codes to indicate pass/fail.
