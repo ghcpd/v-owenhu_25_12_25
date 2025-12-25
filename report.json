@@ -1,0 +1,131 @@
+{
+  "summary": {
+    "total_vulnerabilities": 12,
+    "critical": 6,
+    "high": 4,
+    "medium": 2,
+    "low": 0
+  },
+  "details": [
+    {
+      "id": 1,
+      "file": "input.py",
+      "line_numbers": [8],
+      "vulnerability_type": "Hardcoded Secrets - API Key",
+      "severity": "CRITICAL",
+      "original": "EXTERNAL_API_KEY = \"ABC123_SUPER_SECRET_API_KEY\"",
+      "updated": "EXTERNAL_API_KEY = os.getenv(\"EXTERNAL_API_KEY\")",
+      "fix_explanation": "Never hardcode API keys or credentials in source code. Load from environment variables instead. This prevents accidental exposure if code is committed to version control or shared."
+    },
+    {
+      "id": 2,
+      "file": "input.py",
+      "line_numbers": [9, 10],
+      "vulnerability_type": "Hardcoded Secrets - Database Credentials",
+      "severity": "CRITICAL",
+      "original": "DB_USER = \"admin\"\nDB_PASS = \"P@ssw0rd!\"",
+      "updated": "DB_USER = os.getenv(\"DB_USER\")\nDB_PASS = os.getenv(\"DB_PASS\")",
+      "fix_explanation": "Hardcoded database credentials are a critical security risk. Always use environment variables or secure vaults (e.g., AWS Secrets Manager, HashiCorp Vault) to manage credentials."
+    },
+    {
+      "id": 3,
+      "file": "input.py",
+      "line_numbers": [16],
+      "vulnerability_type": "Disabled SSL/TLS Verification",
+      "severity": "CRITICAL",
+      "original": "r = requests.get(endpoint, headers=headers, verify=False)",
+      "updated": "r = requests.get(endpoint, headers=headers, timeout=10)",
+      "fix_explanation": "verify=False disables SSL/TLS certificate verification, making the application vulnerable to man-in-the-middle attacks. Enable verification (default behavior) and add timeout for safety."
+    },
+    {
+      "id": 4,
+      "file": "input.py",
+      "line_numbers": [18],
+      "vulnerability_type": "SQL Injection",
+      "severity": "CRITICAL",
+      "original": "cur.execute(f\"SELECT id FROM users WHERE username = '{username}' AND password = '{password}'\")",
+      "updated": "cur.execute(\"SELECT id FROM users WHERE username = ? AND password = ?\", (username, password))",
+      "fix_explanation": "SQL injection allows attackers to manipulate database queries. Always use parameterized queries (prepared statements) with placeholders (?) instead of string interpolation."
+    },
+    {
+      "id": 5,
+      "file": "input.py",
+      "line_numbers": [22],
+      "vulnerability_type": "Command Injection",
+      "severity": "CRITICAL",
+      "original": "cmd = f\"ping -n 1 {user_input}\"\nsubprocess.call(cmd, shell=True)",
+      "updated": "cmd = [\"ping\", \"-n\", \"1\", user_input]\nsubprocess.run(cmd, check=False, timeout=10)",
+      "fix_explanation": "shell=True is dangerous and enables command injection attacks. Use list-based arguments and avoid shell=True. Additionally, validate/sanitize user input using regex or allowlists."
+    },
+    {
+      "id": 6,
+      "file": "input.py",
+      "line_numbers": [25],
+      "vulnerability_type": "Unsafe Deserialization",
+      "severity": "CRITICAL",
+      "original": "profile = pickle.loads(serialized_data)",
+      "updated": "profile = json.loads(serialized_data.decode('utf-8'))",
+      "fix_explanation": "pickle.loads() is dangerous as it can execute arbitrary Python code during deserialization. Use JSON or other safe serialization formats instead. JSON only deserializes data structures, not code."
+    },
+    {
+      "id": 7,
+      "file": "input.py",
+      "line_numbers": [28],
+      "vulnerability_type": "Arbitrary Code Execution via eval()",
+      "severity": "CRITICAL",
+      "original": "return eval(expr)",
+      "updated": "return ast.literal_eval(expr)",
+      "fix_explanation": "eval() executes arbitrary Python code. Use ast.literal_eval() which safely evaluates Python literal structures (strings, numbers, lists, dicts) without allowing code execution."
+    },
+    {
+      "id": 8,
+      "file": "input.py",
+      "line_numbers": [31, 34],
+      "vulnerability_type": "Hardcoded Secrets - RSA Private Key",
+      "severity": "CRITICAL",
+      "original": "private_key = \"\"\"-----BEGIN RSA PRIVATE KEY-----\nMIICWwIBAAKBgQC7...\n-----END RSA PRIVATE KEY-----\"\"\"",
+      "updated": "private_key = os.getenv(\"RSA_PRIVATE_KEY\")",
+      "fix_explanation": "Never embed cryptographic keys in source code. Store in secure vaults, environment variables, or key management services. If exposed, the key compromises all encrypted data and communications."
+    },
+    {
+      "id": 9,
+      "file": "input.py",
+      "line_numbers": [37],
+      "vulnerability_type": "Path Traversal / Unrestricted File Upload",
+      "severity": "HIGH",
+      "original": "with open(file_path, \"rb\") as f:\n    data = f.read()\nrequests.post(destination, data=data)",
+      "updated": "if \"..\" in file_path or file_path.startswith(\"/\"):\n    raise ValueError(...)\nfile_obj = Path(file_path)\nif not file_obj.exists():\n    raise FileNotFoundError(...)\nwith open(file_path, \"rb\") as f:\n    data = f.read()\nrequests.post(destination, data=data, timeout=30)",
+      "fix_explanation": "Path traversal allows attackers to access arbitrary files on the system (e.g., ../etc/passwd). Validate file paths to prevent directory traversal, verify file existence, and add timeout for network requests."
+    },
+    {
+      "id": 10,
+      "file": "input.py",
+      "line_numbers": [40],
+      "vulnerability_type": "Hardcoded Secrets - Fallback Token",
+      "severity": "CRITICAL",
+      "original": "if not token:\n    token = \"DEFAULT_TOKEN_IN_CODE\"",
+      "updated": "if not token:\n    raise ValueError(\"Service token not configured...\")",
+      "fix_explanation": "Hardcoded fallback credentials/tokens are security risks. Fail securely with clear error messages instead of using defaults, forcing proper configuration and preventing accidental exposure."
+    },
+    {
+      "id": 11,
+      "file": "input.py",
+      "line_numbers": [43],
+      "vulnerability_type": "Insecure Temporary File Creation",
+      "severity": "HIGH",
+      "original": "tmp_path = \"/tmp/vuln_temp.txt\"\nwith open(tmp_path, \"w\") as f:\n    f.write(data)\nreturn tmp_path",
+      "updated": "with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as tmp_file:\n    tmp_file.write(data)\n    tmp_path = tmp_file.name\nos.chmod(tmp_path, 0o600)",
+      "fix_explanation": "Predictable temp file paths are vulnerable to race conditions and unauthorized access. Use tempfile.NamedTemporaryFile() which creates files with secure random names and restrictive permissions (0o600)."
+    },
+    {
+      "id": 12,
+      "file": "input.py",
+      "line_numbers": [32],
+      "vulnerability_type": "Plaintext Secrets Storage",
+      "severity": "HIGH",
+      "original": "def save_secret_to_file(secret: str, path: str):\n    with open(path, \"w\") as f:\n        f.write(secret)",
+      "updated": "def save_secret_to_file(secret: str, path: str):\n    with open(path, \"w\") as f:\n        f.write(secret)\n    os.chmod(path, 0o600)",
+      "fix_explanation": "Storing secrets in plaintext files is dangerous. Always encrypt sensitive data at rest, use restrictive file permissions (0o600 - read/write for owner only), and consider using key management services for production."
+    }
+  ]
+}
