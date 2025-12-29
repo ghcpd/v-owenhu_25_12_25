@@ -1,21 +1,47 @@
-You are a software security engineer. Your task is to audit and secure the provided source file named `input.py`.
+# Role & Objective
 
-Deliverables (exactly):
+You are a software security engineer. Your task is to audit and secure the provided source file named input.py, implementing comprehensive vulnerability detection and automated testing with intelligent validation.
 
-1) Findings and Backup
-   - Identify all vulnerabilities in `input.py` and list each with file name and precise line numbers.
-   - Detect and report any hardcoded secrets or API keys, also with file name and line numbers.
-   - Create an exact backup of the original source named `input_backup.py` before making any changes.
+# Inputs & Context
 
-2) Secure the source
-   - Produce a secure, fixed version of `input.py` that eliminates ALL identified vulnerabilities while preserving intended functionality where reasonable.
-   - Replace hardcoded secrets with environment-variable based configuration or read from a protected file path.
-   - Remove unsafe constructs (no `eval()` on arbitrary input, no unsafe `pickle.loads()` by default, no `shell=True` using unvalidated inputs, no inline default secrets, no verify=False on requests).
-   - Use parameterized SQL queries; validate or sanitize external inputs; avoid predictable temp file paths; restrict file write permissions when secrets are stored on disk.
+- **Primary Input**: A Python source file named `input.py` located in the current working directory
+- **Expected Issues**: The file contains security vulnerabilities including hardcoded secrets, injection flaws, unsafe deserialization, and insecure coding practices
+- **Working Directory**: Current working directory (no path changes required)
 
-3) Evidence & Explanation
-   - Create `report.json` (JSON only) with the exact schema below and fill entries for every finding and fix:
+# Step-by-Step Instructions
 
+## Phase 1: Vulnerability Identification and Documentation
+
+1. **Read and analyze** `input.py` to identify all security vulnerabilities
+2. **Detect and catalog** each vulnerability with:
+   - File name (input.py)
+   - Exact line numbers
+   - Vulnerability type (e.g., SQL injection, command injection, hardcoded secrets)
+   - Severity level (Critical, High, Medium, Low)
+3. **Identify all hardcoded secrets** including API keys, database credentials, private keys, tokens, and passwords with their exact line numbers
+
+## Phase 2: Backup Creation
+
+4. **Create an exact backup** of the original `input.py` named `input_backup.py` before making any changes
+
+## Phase 3: Security Remediation
+
+5. **Apply comprehensive security fixes** to `input.py`:
+   - **Secrets Management**: Move all hardcoded secrets to environment variables
+   - **SQL Injection**: Replace all string concatenation/f-string queries with parameterized queries
+   - **Command Injection**: Replace `subprocess` calls that use `shell=True` with argument lists; validate host/command inputs
+   - **Code Injection**: Replace `eval()` with safe alternatives like `ast.literal_eval()`
+   - **Unsafe Deserialization**: Eliminate or restrict `pickle.loads()` usage; prefer JSON; if pickle is required, gate it behind an environment flag (e.g., `ALLOW_PICKLE=1`)
+   - **Network Security**: Enforce `verify=True` for HTTPS requests and add timeout parameters
+   - **File Operations**: Use secure temporary file creation (`tempfile.NamedTemporaryFile`), set restrictive permissions (0o600), validate upload paths
+   - **Test Safety**: Add logic to prevent destructive operations during testing (controlled by `SAFE_TEST=1` environment variable)
+6. **Ensure idiomatic, production-ready code** with proper error handling
+
+## Phase 4: Vulnerability Report Generation
+
+7. **Generate `report.json`** with the following exact structure:
+
+```json
 {
   "summary": {
     "total_vulnerabilities": <integer>,
@@ -29,42 +55,171 @@ Deliverables (exactly):
       "id": <integer>,
       "file": "input.py",
       "line_numbers": [<list of integers>],
-      "original": "<string>",
-      "updated": "<string>",
-      "fix_explanation": "<string>"
+      "original": "<exact original code snippet>",
+      "updated": "<exact fixed code snippet>",
+      "fix_explanation": "<detailed explanation including vulnerability type and severity>"
     }
   ]
 }
+```
 
-   - Each detail must include the vulnerability type, severity, affected lines, original snippet, replacement snippet, and a concise reasoning for the remediation.
+## Phase 5: Test Infrastructure Creation
 
-4) Reproducible environment and tests
-   - Add `requirements.txt`, `Dockerfile`, and `setup.sh` (Linux/macOS) to reproduce the environment.
-   - Add `run_test.sh` (Linux/macOS) and `run_test.bat` (Windows) to run the tests for a single target or both targets. Tests MUST be safe (no destructive operations when `SAFE_TEST=1`).
-   - Implement `auto_test.py` that:
-     - Detects the current platform (Windows/Linux/Docker).
-     - Runs the corresponding test runner for both `input_backup.py` and `input.py` in sequence.
-     - Writes detailed logs to `logs/test_run.log` (append mode), each test block must include start timestamp, test output, and final status line `TEST PASSED` or `TEST FAILED`.
-     - Determines pass/fail based on both: process exit codes and static/rule-based source checks (detect hardcoded secrets, use of eval/pickle.loads/shell=True/verify=False, etc.).
-     - When static checks detect problems in source code, mark that test as FAILED even if the process exit code is 0.
+8. **Create `tests/sitecustomize.py`**: A test harness that monkeypatches dangerous operations when `SAFE_TEST=1` is set:
+   - Stub `requests.get`/`requests.post` to return safe mock responses
+   - Stub `subprocess.Popen` and `subprocess.run` to return safe mock results
+   - Disable `pickle.loads` or return safe mock data
+   - Ensure stubs allow scripts to run to completion without actual external calls
 
-5) Test harness & safety
-   - Provide a `tests/sitecustomize.py` (or equivalent) that stubs network/subprocess/pickle in `SAFE_TEST` mode to prevent destructive or network operations during tests.
-   - Tests should capture stdout/stderr into `logs/<target>.out` and append those outputs to `logs/test_run.log`.
-   - The test runner must treat any runtime error output (tracebacks, unhandled exceptions, or notable OS error messages) as a test failure.
+9. **Create platform-specific test runners**:
+   
+   **a) `run_test.sh` (Linux/macOS)**:
+   - Accept optional filename argument (default: run both `input_backup.py` and `input.py`)
+   - Set environment: `SAFE_TEST=1` and `PYTHONPATH=tests`
+   - Execute specified file(s) with Python
+   - Save output to `logs/<filename>.out`
+   - Return appropriate exit code
+   
+   **b) `run_test.bat` (Windows)**:
+   - Same functionality as `run_test.sh`
+   - Use Windows batch syntax
+   - Properly handle conditional logic to avoid batch parsing errors
 
-6) Documentation
-   - Provide `README.md` describing every generated file, setup steps, how to run tests (per platform), how `auto_test.py` works, and how to interpret `logs/test_run.log` (including the `TEST PASSED` / `TEST FAILED` lines).
+10. **Create `auto_test.py`**: An intelligent automated test orchestrator that:
+    - **Detects the current platform** (Windows/Linux/macOS)
+    - **Runs tests for both files sequentially**: First `input_backup.py`, then `input.py`
+    - **Performs static vulnerability analysis** on each file's source code before running:
+      - Detect hardcoded secrets (API keys, credentials, private keys)
+      - Detect `eval()` usage
+      - Detect `pickle.loads()` usage (unless `ALLOW_PICKLE` is present in source as a gating mechanism)
+      - Detect `shell=True` in subprocess calls
+      - Detect `verify=False` in requests
+      - Detect SQL injection patterns (f-strings, `.format()`, `%` formatting in SQL queries)
+      - Detect predictable temporary file paths
+      - Ignore matches in comments (strip comments before pattern matching)
+    - **Executes the corresponding platform test script** for each file
+    - **Determines test result** based on:
+      - Process exit code (non-zero = FAIL)
+      - Static vulnerability checks (any critical issues found = FAIL)
+      - Runtime output analysis (presence of "traceback", "exception", "error" keywords = FAIL)
+    - **Generates timestamped logs** saved to `logs/test_run.log` with:
+      - ISO 8601 timestamp for each test run
+      - File name being tested
+      - Static analysis findings (if any)
+      - Complete test output
+      - Final status line: `TEST PASSED` or `TEST FAILED (reason)`
+    - **Outputs summary**: `AUTO_TEST SUMMARY - ALL PASSED` or `AUTO_TEST SUMMARY - SOME FAILED`
+    - **Expected outcome**: `input_backup.py` should FAIL (contains vulnerabilities), `input.py` should PASS (vulnerabilities fixed)
 
-Constraints & Notes:
-- Do not change any files other than those necessary to implement the deliverables listed above.
-- Keep changes minimal and focused; document every change in `report.json`.
-- Ensure the outputs are deterministic and safe: the `auto_test.py` must be able to run in an isolated environment and produce `logs/test_run.log` reproducibly.
-- Prefer explicit checks (static patterns and runtime output scanning) rather than brittle heuristics.
+## Phase 6: Environment Replication Files
 
-Success Criteria:
-- `input_backup.py` must remain an unmodified copy of the original and should fail the tests due to detected insecure patterns.
-- `input.py` must pass the `auto_test.py` checks (no static critical issues and no runtime errors under `SAFE_TEST`).
-- `report.json` must enumerate all findings and fixes with clear severity classifications.
+11. **Create `requirements.txt`**: List all Python dependencies (at minimum: `requests`)
 
-End of prompt.
+12. **Create `Dockerfile`**:
+    - Use official Python base image
+    - Copy all project files
+    - Install dependencies from `requirements.txt`
+    - Set working directory
+    - Default command: `python auto_test.py`
+
+13. **Create `setup.sh`** (Linux/macOS):
+    - Create Python virtual environment
+    - Activate virtual environment
+    - Install dependencies from `requirements.txt`
+    - Include usage instructions in comments
+
+## Phase 7: Documentation
+
+14. **Create `README.md`** containing:
+    - **Overview**: Purpose and description of all generated files
+    - **File Manifest**: List each file with its purpose
+    - **Setup Instructions**: Step-by-step environment setup for each platform
+    - **Testing Instructions**:
+      - How to run `run_test.sh` (Linux/macOS)
+      - How to run `run_test.bat` (Windows)
+      - How to use `auto_test.py` for automatic platform detection and testing
+    - **Log Interpretation**: How to read `logs/test_run.log` and understand `TEST PASSED`/`TEST FAILED` status
+    - **Expected Results**: Explanation that `input_backup.py` should fail (unfixed vulnerabilities detected) and `input.py` should pass (vulnerabilities remediated)
+    - **Security Best Practices**: Recommendations for production deployment
+
+## Phase 8: Validation and Execution
+
+15. **Execute `auto_test.py`** to validate the implementation
+16. **Verify that**:
+    - `input_backup.py` test results in **TEST FAILED** with vulnerability findings logged
+    - `input.py` test results in **TEST PASSED**
+    - `logs/test_run.log` contains timestamped entries with proper pass/fail indicators
+
+# Output Specification
+
+## Files to Create/Modify
+
+1. **input_backup.py**: Exact copy of original `input.py`
+2. **input.py**: Secured version with all vulnerabilities fixed
+3. **report.json**: Structured vulnerability report (exact JSON format specified above)
+4. **requirements.txt**: Python dependencies
+5. **Dockerfile**: Container build instructions
+6. **setup.sh**: Linux/macOS setup script (executable)
+7. **run_test.sh**: Linux/macOS test runner (executable)
+8. **run_test.bat**: Windows test runner
+9. **tests/sitecustomize.py**: Test harness with safe stubs
+10. **auto_test.py**: Automated test orchestrator with static analysis
+11. **README.md**: Complete documentation
+12. **logs/test_run.log**: Test execution log (generated by `auto_test.py`)
+
+## Critical Output Requirements
+
+- All shell scripts (`.sh`) must have executable permissions
+- `logs/` directory must be created
+- `secrets/` directory should be created for secure secret storage (with 0o700 permissions)
+- All files must use UTF-8 encoding
+- Test logs must include ISO 8601 timestamps
+- `auto_test.py` must perform **both runtime testing and static source analysis**
+- Static analysis must detect common vulnerability patterns and cause tests to fail appropriately
+
+# Constraints & Preferences
+
+## Security Standards
+
+- Zero hardcoded secrets in `input.py`
+- All database queries must use parameterized statements
+- No use of `shell=True` with user-controlled input
+- No use of `eval()` or `exec()` on untrusted data
+- HTTPS verification must be enabled
+- Secure file permissions on sensitive data
+
+## Testing Standards
+
+- Tests must run safely without destructive operations (use `SAFE_TEST=1` and monkeypatching)
+- `input_backup.py` must fail validation (contains original vulnerabilities)
+- `input.py` must pass validation (vulnerabilities remediated)
+- Test failures must be based on actual security issues, not just exit codes
+- Static analysis must ignore commented code and allow gated dangerous operations
+
+## Code Quality
+
+- Production-ready, idiomatic Python
+- Proper error handling and logging
+- Cross-platform compatibility (Windows, Linux, macOS)
+- Clear, maintainable code structure
+
+# Quality Gates
+
+Before completion, verify:
+
+✓ `input_backup.py` is an exact copy of original `input.py`
+✓ `input.py` contains no hardcoded secrets, uses parameterized SQL, safe deserialization, and validated subprocess calls
+✓ `report.json` is valid JSON with all required fields
+✓ All test infrastructure files are created and functional
+✓ `auto_test.py` performs static vulnerability scanning and correctly identifies issues in `input_backup.py`
+✓ `auto_test.py` execution shows `input_backup.py` FAILED and `input.py` PASSED
+✓ `logs/test_run.log` contains timestamped entries with proper status indicators
+✓ `README.md` provides complete setup and usage instructions
+✓ All files are in UTF-8 encoding
+✓ Shell scripts have executable permissions
+
+# Critical Compliance Instructions
+
+**MANDATORY**: The `auto_test.py` script must implement **static source code analysis** to detect vulnerability patterns (hardcoded secrets, eval, unsafe pickle, shell=True, verify=False, SQL injection patterns, etc.) and **fail tests when these patterns are found**. This ensures that `input_backup.py` (which contains vulnerabilities) will correctly fail testing, while `input.py` (with fixes applied) will pass. Do not rely solely on process exit codes for test validation.
+
+Execute all phases completely in a single interaction. Do not prompt for confirmation or additional input. Proceed with implementation immediately.
