@@ -1,53 +1,172 @@
-# Final Prompt: Security Audit and Fix for input.py - Completed
+**Role & Objective**
 
-## Original Task
-You are a software security engineer. Your task is to audit and secure the provided source file named input.py.
+You are a software security engineer. Your task is to audit and secure the source file named input.py in a single execution, producing all required deliverables without requiring follow-up interactions.
 
-Your responsibilities include:
+**Inputs & Context**
 
-1. Identify all vulnerabilities in input.py and list each with file name and line numbers.
-2. Detect and report any hardcoded secrets or API keys, also with file name and line numbers.
-3. Create a backup of the original input.py named input_backup.py before making any changes.
-4. Repair the source code to eliminate all identified vulnerabilities and produce a secure version of input.py.
-5. Provide a detailed explanation for each fix, including vulnerability type, severity, affected lines, and the secure replacement. Save this information in a structured JSON file named report.json using the following format:
+- Source file: input.py (located in the current working directory)
+- The file contains security vulnerabilities including hardcoded secrets, insecure functions, and various code injection risks
 
-{
-  "summary": {
-    "total_vulnerabilities": <integer>,
-    "critical": <integer>,
-    "high": <integer>,
-    "medium": <integer>,
-    "low": <integer>
-  },
-  "details": [
-    {
-      "id": <integer>,
-      "file": "input.py",
-      "line_numbers": [<list of integers>],
-      "original": "<string>",
-      "updated": "<string>",
-      "fix_explanation": "<string>",
-    }
-  ]
-}
+**Step-by-Step Instructions**
 
-6. Generate environment replication scripts for each major platform, including:
-   - requirements.txt, Dockerfile, and setup.sh (for Linux/macOS)
-   - run_test.sh (Linux/macOS), run_test.bat (Windows)
+1. **Backup Original File**
+   - Create an exact copy of input.py named input_backup.py before making any modifications
+   - This backup must preserve the original vulnerable code exactly as provided
 
-7. Implement an automatic test execution script named auto_test.py that:
-   - Detects the current environment (Windows/Linux/Docker)
-   - Runs the corresponding test script (run_test.sh for Linux/macOS, run_test.bat for Windows)
-   - Saves all output logs to logs/test_run.log
-   - The log must include a timestamp and a final status line: TEST PASSED or TEST FAILED
-   - auto_test.py should run tests for both input_backup.py and input.py in sequence, log the results for each test (including timestamp, file name, output, and final status), and determine success or failure based on the actual test script exit codes. 
-   - These tests are intended to verify that the security fixes applied to input.py resolve the issues present in input_backup.py.
+2. **Vulnerability Analysis**
+   - Identify all security vulnerabilities in input.py
+   - Document each vulnerability with:
+     * File name (input.py)
+     * Exact line numbers
+     * Vulnerability type (e.g., hardcoded secrets, SQL injection, command injection, insecure deserialization)
+     * Severity level (Critical/High/Medium/Low)
 
-8. Generate a README.md file that provides:
-   - An overview of all generated files and their purpose.
-   - Step-by-step instructions to set up the environment.
-   - How to run the test scripts (run_test.sh for Linux/macOS, run_test.bat for Windows).
-   - How to use auto_test.py for automatic environment detection and testing.
+3. **Detect Hardcoded Secrets**
+   - Scan for all hardcoded API keys, passwords, tokens, private keys, and other sensitive credentials
+   - Record the exact line numbers where each secret appears
+   - Identify the type of secret (e.g., API key, database password, private key)
+
+4. **Security Remediation**
+   - Repair input.py to eliminate all identified vulnerabilities
+   - Replace hardcoded secrets with environment variable lookups using os.getenv()
+   - Remove or replace insecure functions (e.g., pickle.loads, eval, exec)
+   - Implement parameterized queries to prevent SQL injection
+   - Sanitize inputs to prevent command injection
+   - Apply secure coding best practices throughout
+   - Ensure the fixed input.py is functionally equivalent but secure
+
+5. **Generate Vulnerability Report**
+   - Create report.json with the following exact structure:
+   ```json
+   {
+     "summary": {
+       "total_vulnerabilities": <integer>,
+       "critical": <integer>,
+       "high": <integer>,
+       "medium": <integer>,
+       "low": <integer>
+     },
+     "details": [
+       {
+         "id": <integer>,
+         "file": "input.py",
+         "line_numbers": [<list of integers>],
+         "original": "<original vulnerable code string>",
+         "updated": "<fixed secure code string>",
+         "fix_explanation": "<detailed explanation including vulnerability type, severity, and why the fix is secure>"
+       }
+     ]
+   }
+   ```
+   - Include all vulnerabilities in the details array
+   - Ensure each fix_explanation is comprehensive and educational
+
+6. **Generate Environment Replication Scripts**
+   - **requirements.txt**: List all Python dependencies required to run the code
+   - **Dockerfile**: Create a Docker container configuration for Linux environment
+   - **setup.sh**: Bash script for Linux/macOS environment setup (install dependencies, create directories)
+   - **run_test.sh**: Bash script for Linux/macOS that:
+     * Accepts a Python file path as argument
+     * Executes the file and captures all output (stdout and stderr) to output.txt
+     * Filters output to remove traceback lines (lines starting with "File " or "Traceback")
+     * Checks the filtered output for sensitive data leakage:
+       - Search for hardcoded private key patterns (e.g., "MIICWwIBAAKBgQC7")
+       - Search for current working directory path
+     * Returns exit code 1 (failure) if sensitive data is found
+     * Returns exit code 0 (success) if no sensitive data is found
+   - **run_test.bat**: Windows batch script with identical logic to run_test.sh but using Windows commands
+
+7. **Implement Automated Testing System**
+   - Create auto_test.py with the following requirements:
+     * Detect current operating system (Windows/Linux/macOS)
+     * Create logs directory if it doesn't exist
+     * Run tests sequentially for both input_backup.py and input.py:
+       - For Windows: Execute run_test.bat <filename>
+       - For Linux/macOS: Execute run_test.sh <filename>
+     * Capture test exit codes to determine pass/fail status
+     * Write all output to logs/test_run.log with:
+       - ISO 8601 timestamp for each test execution
+       - File name being tested
+       - Full captured output from test script
+       - Final status line: "TEST PASSED" or "TEST FAILED" based on exit code
+     * Do NOT generate or create any file named input_fixed.py
+
+8. **Generate Comprehensive Documentation**
+   - Create README.md containing:
+     * Overview section listing all generated files and their purpose
+     * Prerequisites section (Python version, required tools)
+     * Step-by-step environment setup instructions for each platform
+     * Instructions to run test scripts manually (run_test.sh on Linux/macOS, run_test.bat on Windows)
+     * Instructions to use auto_test.py for automated environment detection and testing
+     * How to interpret logs/test_run.log results
+     * Explanation of TEST PASSED vs TEST FAILED status
+     * Troubleshooting section for common issues
+
+**Output Specification**
+
+Generate the following files in the current working directory:
+
+1. input_backup.py - Exact copy of original input.py (must remain vulnerable)
+2. input.py - Secured version with all vulnerabilities fixed
+3. report.json - Structured vulnerability report with exact JSON schema as specified
+4. requirements.txt - Python package dependencies
+5. Dockerfile - Container configuration
+6. setup.sh - Linux/macOS setup script (executable)
+7. run_test.sh - Linux/macOS test script (executable)
+8. run_test.bat - Windows test script
+9. auto_test.py - Automated test orchestrator
+10. logs/test_run.log - Test execution log (created by auto_test.py)
+11. README.md - Complete documentation
+
+Do NOT create any file named input_fixed.py or any other intermediate files.
+
+**Constraints & Preferences**
+
+- All scripts must be idempotent (safe to run multiple times)
+- Test scripts must filter out Python traceback lines to avoid false positives from error stack traces
+- Test scripts must use accessible endpoints (e.g., httpbin.org) instead of non-existent URLs to prevent network errors
+- Environment variables for secrets must be clearly documented (e.g., EXTERNAL_API_KEY, DB_USER, DB_PASS, SERVICE_TOKEN)
+- All shell scripts must use absolute paths or proper path handling
+- Avoid creating temporary files unless absolutely necessary; clean up any temporary files created
+- Code must be Python 3.x compatible
+- All file operations must use UTF-8 encoding
+
+**Quality Gates**
+
+Upon completion, verify the following conditions are met:
+
+1. **File Structure Verification**
+   - input_backup.py exists and contains the original vulnerable code
+   - input.py exists and contains the secured code
+   - All 11 required files are present
+   - No file named input_fixed.py exists
+
+2. **Test Validation**
+   - When run_test.sh or run_test.bat is executed with input_backup.py as argument, it must return exit code 1 (TEST FAILED) because the file prints sensitive data (hardcoded private key and/or current working directory)
+   - When run_test.sh or run_test.bat is executed with input.py as argument, it must return exit code 0 (TEST PASSED) because the file does not leak sensitive data
+   - auto_test.py successfully executes tests for both files and logs results correctly
+   - logs/test_run.log contains timestamped entries showing input_backup.py failed and input.py passed
+
+3. **Security Verification**
+   - input.py contains no hardcoded secrets (all secrets retrieved from environment variables)
+   - input.py uses parameterized queries instead of string concatenation for SQL
+   - input.py does not use eval(), exec(), or pickle.loads() with untrusted data
+   - input.py sanitizes all user inputs before use in system commands
+   - report.json accurately documents all vulnerabilities and fixes
+
+4. **Documentation Completeness**
+   - README.md provides clear instructions for all platforms
+   - All generated scripts are documented in README.md
+   - Test interpretation guidelines are clearly explained
+
+**Critical Requirements**
+
+- The test scripts MUST be designed so that input_backup.py FAILS (demonstrating vulnerabilities) and input.py PASSES (demonstrating successful fixes)
+- If input_backup.py would crash before executing vulnerable code paths, modify its main execution block to print sensitive data early (before database calls or network requests) to ensure vulnerabilities are detected
+- Do NOT create any file named input_fixed.py during the process
+- Complete all tasks in a single execution without requiring user confirmation or follow-up commands
+- All outputs must be production-ready and fully functional
+
    - How to check logs in logs/test_run.log and interpret TEST PASSED or TEST FAILED status.
 
 ## Completion Status
