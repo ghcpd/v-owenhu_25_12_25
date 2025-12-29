@@ -1,35 +1,48 @@
-Task: Audit and secure the supplied Python source file `input.py`.
+You are a software security engineer. Your task is to audit and secure the provided source file named input.py.
 
-Requirements (must be completed exactly):
+Your responsibilities include:
 
-1) Identify all vulnerabilities in `input.py` and list each with file name and exact line numbers.
-2) Detect and report any hardcoded secrets or API keys with file name and exact line numbers.
-3) Create a backup copy named `input_backup.py` before modifying the original.
-4) Repair the source so all identified vulnerabilities are eliminated and save the secure version as `input.py`.
-5) Produce a structured JSON report `report.json` containing a summary and per-fix details using this format:
-   {
-     "summary": { "total_vulnerabilities": <int>, "critical": <int>, "high": <int>, "medium": <int>, "low": <int> },
-     "details": [ { "id": <int>, "file": "input.py", "line_numbers": [<ints>], "original": "<string>", "updated": "<string>", "fix_explanation": "<string>" } ]
-   }
-6) Add environment replication artifacts:
-   - `requirements.txt`, `Dockerfile`, `setup.sh`
-   - `run_test.sh` (Linux/macOS), `run_test.bat` (Windows)
-7) Implement `auto_test.py` that:
-   - Detects environment (Windows/Linux/Docker)
-   - Runs appropriate test script
-   - Logs timestamped output to `logs/test_run.log`
-   - Runs tests for both `input_backup.py` and `input.py` in sequence and records per-file output and final status
-   - Writes a final overall status line: TEST PASSED or TEST FAILED
-8) Create `README.md` explaining files, setup steps, how to run tests, how to use `auto_test.py`, and how to interpret `logs/test_run.log`.
+1. Identify all vulnerabilities in input.py and list each with file name and line numbers.
+2. Detect and report any hardcoded secrets or API keys, also with file name and line numbers.
+3. Create a backup of the original input.py named input_backup.py before making any changes.
+4. Repair the source code to eliminate all identified vulnerabilities and produce a secure version of input.py.
+5. Provide a detailed explanation for each fix, including vulnerability type, severity, affected lines, and the secure replacement. Save this information in a structured JSON file named report.json using the following format:
 
-Acceptance criteria:
-- `input_backup.py` demonstrates the original vulnerabilities (tests should fail for backup).
-- `input.py` passes the security checks (tests should pass for fixed file).
-- `report.json` accurately documents each fix with affected line numbers and rationale.
-- No secrets or keys are left hardcoded in `input.py`.
-- All scripts run on Windows and Linux; Dockerfile must build and run `auto_test.py` successfully.
+{
+  "summary": {
+    "total_vulnerabilities": <integer>,
+    "critical": <integer>,
+    "high": <integer>,
+    "medium": <integer>,
+    "low": <integer>
+  },
+  "details": [
+    {
+      "id": <integer>,
+      "file": "input.py",
+      "line_numbers": [<list of integers>],
+      "original": "<string>",
+      "updated": "<string>",
+      "fix_explanation": "<string>",
+    }
+  ]
+}
 
-Notes:
-- Do not modify any files other than those required by the task.
-- Prefer secure-by-default implementations (no eval/pickle, parameterized SQL, no shell=True with untrusted input, TLS verify enabled, secrets from environment or secure storage).
-- Tests must be deterministic and use exit codes to indicate pass/fail.
+6. Generate environment replication scripts for each major platform, including:
+   - requirements.txt, Dockerfile, and setup.sh (for Linux/macOS)
+   - run_test.sh (Linux/macOS), run_test.bat (Windows)
+
+7. Implement an automatic test execution script named auto_test.py that:
+   - Detects the current environment (Windows/Linux/Docker)
+   - Runs the corresponding test script (run_test.sh for Linux/macOS, run_test.bat for Windows)
+   - Saves all output logs to logs/test_run.log
+   - The log must include a timestamp and a final status line: TEST PASSED or TEST FAILED
+   - auto_test.py should run tests for both input_backup.py and input.py in sequence, log the results for each test (including timestamp, file name, output, and final status), and determine success or failure based on the actual test script exit codes. 
+   - These tests are intended to verify that the security fixes applied to input.py resolve the issues present in input_backup.py.
+
+8. Generate a README.md file that provides:
+   - An overview of all generated files and their purpose.
+   - Step-by-step instructions to set up the environment.
+   - How to run the test scripts (run_test.sh for Linux/macOS, run_test.bat for Windows).
+   - How to use auto_test.py for automatic environment detection and testing.
+   - How to check logs in logs/test_run.log and interpret TEST PASSED or TEST FAILED status.
